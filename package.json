@@ -1,7 +1,7 @@
 {
-  "name": "geo",
+  "name": "geo-find-close-polylines",
   "version": "0.0.1",
-  "description": "Basic functions for indexing and organizing lat/long points and lines.",
+  "description": "Quickly find the closest line segments of a polyline on the earth's surface.",
   "main": "geo.js",
   "scripts": {
     "build": "tsc --project .",
