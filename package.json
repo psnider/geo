@@ -1,14 +1,19 @@
 {
   "name": "geo-find-close-polylines",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Quickly find the closest line segments of a polyline on the earth's surface.",
   "main": "geo.js",
   "scripts": {
     "build": "tsc --project .",
     "test": "mocha ./geo.tests.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:psnider/geo-find-close-polylines.git"
+  },
+  "author": "Peter Snider",
+  "license": "MIT",
   "dependencies": {
-    "geolib": "^2.0.21",
     "turf": "^3.0.5"
   },
   "devDependencies": {
