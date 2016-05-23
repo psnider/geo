@@ -1,11 +1,12 @@
 {
   "name": "geo-find-close-polylines",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Quickly find the closest line segments of a polyline on the earth's surface.",
-  "main": "geo.js",
+  "main": "geo-find-close-polylines.js",
   "scripts": {
     "build": "tsc --project .",
-    "test": "mocha ./geo.tests.js"
+    "clean": "rm -f geo-find-close-polylines.js geo-find-close-polylines.tests.js",
+    "test": "mocha ./geo-find-close-polylines.tests.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,5 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "typescript": "^1.8.10"
-  },
-  "author": "",
-  "license": "ISC"
+  }
 }

@@ -1,7 +1,7 @@
 "use strict";
 var CHAI = require('chai');
 var expect = CHAI.expect;
-var geo = require('./geo');
+var geo = require('./geo-find-close-polylines');
 describe('geo', function () {
     describe('conversion', function () {
         var LAT_DISTANCE_TO_METERS = {

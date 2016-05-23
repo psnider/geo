@@ -27,9 +27,9 @@
         "placeOpenBraceOnNewLineForControlBlocks": false
     },
     "files": [
-        "geo.ts",
-        "geo.tests.ts",
-        "geo.d.ts",
+        "geo-find-close-polylines.ts",
+        "geo-find-close-polylines.tests.ts",
+        "geo-find-close-polylines.d.ts",
         "typings/assertion-error/assertion-error.d.ts",
         "typings/chai/chai.d.ts",
         "typings/mocha/mocha.d.ts",

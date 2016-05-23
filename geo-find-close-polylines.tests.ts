@@ -1,7 +1,7 @@
 import CHAI                 = require('chai')
 const  expect               = CHAI.expect
 
-import geo                  = require('./geo')
+import geo                  = require('./geo-find-close-polylines')
 
 
 
