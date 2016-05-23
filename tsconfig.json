@@ -1,0 +1,39 @@
+{
+    "version": "1.5.3",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": false,
+        "noLib": false,
+        "outDir": "."
+    },
+    "scripts": {
+        "postbuild": "echo after building"
+    },
+    "formatCodeOptions": {
+        "indentSize": 4,
+        "tabSize": 4,
+        "newLineCharacter": "\n",
+        "convertTabsToSpaces": true,
+        "insertSpaceAfterCommaDelimiter": true,
+        "insertSpaceAfterSemicolonInForStatements": true,
+        "insertSpaceBeforeAndAfterBinaryOperators": true,
+        "insertSpaceAfterKeywordsInControlFlowStatements": true,
+        "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+        "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+        "placeOpenBraceOnNewLineForFunctions": false,
+        "placeOpenBraceOnNewLineForControlBlocks": false
+    },
+    "files": [
+        "geo.ts",
+        "geo.tests.ts",
+        "geo.d.ts",
+        "typings/assertion-error/assertion-error.d.ts",
+        "typings/chai/chai.d.ts",
+        "typings/mocha/mocha.d.ts",
+        "typings/node/node.d.ts",
+        "typings/turf/turf.d.ts"
+    ]
+}

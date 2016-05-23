@@ -1,0 +1,20 @@
+{
+  "name": "geo",
+  "version": "0.0.1",
+  "description": "Basic functions for indexing and organizing lat/long points and lines.",
+  "main": "geo.js",
+  "scripts": {
+    "build": "tsc --project .",
+    "test": "mocha ./geo.tests.js"
+  },
+  "dependencies": {
+    "geolib": "^2.0.21",
+    "turf": "^3.0.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "typescript": "^1.8.10"
+  },
+  "author": "",
+  "license": "ISC"
+}
