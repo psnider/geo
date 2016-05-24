@@ -1,6 +1,6 @@
 {
   "name": "geo-find-close-polylines",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "Quickly find the closest line segments of a polyline on the earth's surface.",
   "main": "geo-find-close-polylines.js",
   "scripts": {

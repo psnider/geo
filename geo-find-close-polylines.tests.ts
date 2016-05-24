@@ -59,28 +59,28 @@ describe('geo', function() {
     describe('mergeBoundingBoxes', function() {
 
         it('should merge box contained in box', function() {
-            var contained: Geo.IBoundingBox = {left: -1, right: 1, top: 1, bottom: 1}
-            var container: Geo.IBoundingBox = {left: -2, right: 2, top: 2, bottom: -2}
+            var contained: Geo.IBoundingBox = [-1, 1, 1, 1]
+            var container: Geo.IBoundingBox = [-2, -2, 2, 2]
             var merged = geo.mergeBoundingBoxes(contained, container)
-            var expected: Geo.IBoundingBox = {left: -2, right: 2, top: 2, bottom: -2}
+            var expected: Geo.IBoundingBox = [-2, -2, 2, 2]
             expect(merged).to.deep.equal(expected)
         })
 
 
         it('should merge boxes that overlap', function() {
-            var a: Geo.IBoundingBox = {left: -2, right: 2, top: 2, bottom: -2}
-            var b: Geo.IBoundingBox = {left: 1, right: 3, top: 3, bottom: 1}
+            var a: Geo.IBoundingBox = [-2, -2, 2, 2]
+            var b: Geo.IBoundingBox = [1, 1, 3, 3]
             var merged = geo.mergeBoundingBoxes(a, b)
-            var expected: Geo.IBoundingBox = {left: -2, right: 3, top: 3, bottom: -2}
+            var expected: Geo.IBoundingBox = [-2, -2, 3, 3]
             expect(merged).to.deep.equal(expected)
         })
 
 
         it('should merge boxes that dont overlap', function() {
-            var a: Geo.IBoundingBox = {left: -2, right: -1, top: -1, bottom: -2}
-            var b: Geo.IBoundingBox = {left: 1, right: 2, top: 2, bottom: 1}
+            var a: Geo.IBoundingBox = [-2, -2, -1, -1]
+            var b: Geo.IBoundingBox = [1, 1, 2, 2]
             var merged = geo.mergeBoundingBoxes(a, b)
-            var expected: Geo.IBoundingBox = {left: -2, right: 2, top: 2, bottom: -2}
+            var expected: Geo.IBoundingBox = [-2, -2, 2, 2]
             expect(merged).to.deep.equal(expected)
         })
 
@@ -90,26 +90,26 @@ describe('geo', function() {
     describe('createSpatialIndexForPath', function() {
 
         var pts = [
-            {lat: 0, lng: 0},
-            {lat: 0, lng: 1},
-            {lat: 0, lng: 2},
-            {lat: 1, lng: 3},
-            {lat: 1, lng: 4}
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [3, 1],
+            [4, 1]
         ]
 
 
         it('should not create a sub-index for a line that is shorter than the max_unindexed_length', function() {
             var index: Geo.SpatialIndexOnPath = geo.createSpatialIndexForPath(pts)
-            var expected = {bbox: {left: 0, right: 4, top: 1, bottom: 0}, start: 0, end: 3}
+            var expected = {bbox: [0, 0, 4, 1], start: 0, end: 3}
             expect(index).to.deep.equal(expected)
         })
 
 
         it('should create a sub-index for a line that is longer than the max_unindexed_length', function() {
             var index: Geo.SpatialIndexOnPath = geo.createSpatialIndexForPath(pts, 2)
-            var expected: Geo.SpatialIndexOnPath = {bbox: {left: 0, right: 4, top: 1, bottom: 0}, start: 0, end: 3}
-            var head = {bbox: {left: 0, right: 2, top: 0, bottom: 0}, start: 0, end: 1}
-            var tail = {bbox: {left: 2, right: 4, top: 1, bottom: 0}, start: 2, end: 3}
+            var expected: Geo.SpatialIndexOnPath = {bbox: [0, 0, 4, 1], start: 0, end: 3}
+            var head = {bbox: [0, 0, 2, 0], start: 0, end: 1}
+            var tail = {bbox: [2, 0, 4, 1], start: 2, end: 3}
             expected.head = head
             expected.tail = tail
             expect(index).to.deep.equal(expected)
@@ -122,8 +122,8 @@ describe('geo', function() {
         describe('when query_distance isn\'t specified', function() {
 
             it('should be true for a point inside the bounds', function() {
-                var bbox = new geo.BoundingBox({left: -10, right: 10, top: 10, bottom: -10})
-                expect(bbox.intersects({lat: 5, lng: 5})).to.be.true
+                var bbox = new geo.BoundingBox([-10, -10, 10, 10])
+                expect(bbox.intersects([5, 5])).to.be.true
             })
 
         })
@@ -132,8 +132,8 @@ describe('geo', function() {
         describe('when query_distance is specified', function() {
 
             it('should be true for a point just outside the bounds', function() {
-                var bbox = new geo.BoundingBox({left: -10, right: 10, top: 10, bottom: -10})
-                expect(bbox.intersects({lat: 0, lng: -10.001}, 150)).to.be.true
+                var bbox = new geo.BoundingBox([-10, -10, 10, 10])
+                expect(bbox.intersects([-10.001, 0], 150)).to.be.true
             })
 
         })
@@ -145,14 +145,14 @@ describe('geo', function() {
 
         // two same size areas, head is upper left, tail is lower right
         const INDEX: Geo.SpatialIndexOnPath = {
-            bbox: {left: -10, bottom: -10, right: 10, top: 10},
+            bbox: [-10, -10, 10, 10],
             start: 0, end: 100,
             head: {
-                bbox: {left: -10, bottom: 0, right: 0, top: 10},
+                bbox: [-10, 0, 0, 10],
                 start: 0, end: 50,
             },
             tail: {
-                bbox: {left: 0, bottom: -10, right: 10, top: 0},
+                bbox: [0, -10, 10, 0],
                 start: 51, end: 100,
             }
         }
@@ -160,19 +160,19 @@ describe('geo', function() {
         describe('when query_distance isn\'t specified', function() {
 
             it('should return null, when there are no matches', function() {
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 11, lng: 0})
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [0, 11])
                 expect(match).to.be.null
             })
 
 
             it('should return one match, when the only match is in the head', function() {
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 5, lng: -5})
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [-5, 5])
                 expect(match).to.deep.equal([{start: 0, end: 50}])
             })
 
 
             it('should return one match, when the only match is in the tail', function() {
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: -5, lng: 5})
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [5, -5])
                 expect(match).to.deep.equal([{start: 51, end: 100}])
             })
 
@@ -183,27 +183,27 @@ describe('geo', function() {
 
             it('should return one match, when the only match just outside the head, but within the query_distance', function() {
                 // the query_pt is left of the top-left point
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 10.001, lng: -10.001}, 150)
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [-10.001, 10.001], 150)
                 expect(match).to.deep.equal([{start: 0, end: 50}])
             })
 
 
             it('should return null, when the only match just outside the head, but outside the query_distance', function() {
                 // the query_pt is left of the top-left point
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 10.001, lng: -10.001}, 80)
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [-10.001, 10.001], 80)
                 expect(match).to.be.null
             })
 
 
             it('should return one match, when the only match just outside the tail, but within the query_distance', function() {
                 // the query_pt is right of the bottom-right point
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 0, lng: 10.001}, 120)
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [10.001, 0], 120)
                 expect(match).to.deep.equal([{start: 51, end: 100}])
             })
 
             it('should return null, when the only match just outside the head, but outside the query_distance', function() {
                 // the query_pt is right of the bottom-right point
-                var match = geo.findPathSegmentsFromPointInIndex(INDEX, {lat: 0, lng: 10.001}, 80)
+                var match = geo.findPathSegmentsFromPointInIndex(INDEX, [10.001, 0], 80)
                 expect(match).to.be.null
             })
 
@@ -215,21 +215,28 @@ describe('geo', function() {
 
     describe('findCloseSegmentsNearPoint', function() {
 
-        var line = [
-            {lat: 0, lng: 0},
-            {lat: 0, lng: 1},
-            {lat: 0, lng: 2}
-        ]
+        var line: Geo.Path = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [
+                    [0, 0],
+                    [1, 0],
+                    [2, 0]
+                ]
+            },
+            properties: {}
+        }
 
         const INDEX: Geo.SpatialIndexOnPath = {
-            bbox: {left: 0, bottom: 0, right: 2, top: 0},
+            bbox: [0, 0, 2, 0],
             start: 0, end: 1,
             head: {
-                bbox: {left: 0, bottom: 0, right: 1, top: 0},
+                bbox: [0, 0, 1, 0],
                 start: 0, end: 0,
             },
             tail: {
-                bbox: {left: 1, bottom: 0, right: 2, top: 0},
+                bbox: [1, 0, 2, 0],
                 start: 1, end: 1,
             }
         }
@@ -237,20 +244,20 @@ describe('geo', function() {
 
 
         it('should not return segments when pt is farther than distance', function() {
-            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, {lat: 0.001, lng: 1}, 80)
+            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [1, 0.001], 80)
             expect(segments).to.have.lengthOf(0)
         })
 
 
         it('should return a segment when pt is closer than distance', function() {
-            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, {lat: 0.001, lng: 0.5}, 120)
+            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [0.5, 0.001], 120)
             expect(segments).to.have.lengthOf(1)
             expect(segments[0].index).to.equal(0)
         })
 
 
         it('should return 2 segments when pt is close to 2 segments', function() {
-            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, {lat: 0.001, lng: 1}, 120)
+            let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [1, 0.001], 120)
             expect(segments).to.have.lengthOf(2)
             expect(segments[0].index).to.equal(0)
             expect(segments[1].index).to.equal(1)

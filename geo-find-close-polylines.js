@@ -27,34 +27,52 @@ function longitudeDistanceToMeters(longitude_distance) {
     return (exports.METERS_PER_DEGREE_AT_EQUATOR * longitude_distance);
 }
 exports.longitudeDistanceToMeters = longitudeDistanceToMeters;
+function isIBoundingBox(obj) {
+    return (Array.isArray(obj) && (obj.length === 4) && (typeof obj[0] === 'number'));
+}
+function isLatLongPt(obj) {
+    return ((obj.geometry) && (obj.geometry.type == 'Point'));
+}
+function isPosition(obj) {
+    return (Array.isArray(obj) && (obj.length === 2) && (typeof obj[0] === 'number'));
+}
+function isArrayOfPositions(obj) {
+    if (Array.isArray(obj) && Array.isArray(obj[0])) {
+        var position = obj[0];
+        return ((position.length === 2) && (typeof position[0] === 'number'));
+    }
+    else {
+        return false;
+    }
+}
 // This uses simple math, and doesnt account for crossing the 180 longitude.
 var BoundingBox = (function () {
     function BoundingBox(obj, query_distance) {
         var _this = this;
         var initFromIBoundingBox = function (bbox) {
-            _this.left = bbox.left;
-            _this.bottom = bbox.bottom;
-            _this.right = bbox.right;
-            _this.top = bbox.top;
+            _this.bbox = [].concat(bbox);
         };
-        var initFromLatLongPt = function (pt) {
-            _this.left = pt.lng;
-            _this.bottom = pt.lat;
-            _this.right = pt.lng;
-            _this.top = pt.lat;
+        var initFromPosition = function (position) {
+            var lng = position[0];
+            var lat = position[1];
+            _this.bbox = [lng, lat, lng, lat];
         };
-        if (obj.left != null) {
-            // assume IBoundingBox
+        if (obj instanceof BoundingBox) {
+            initFromIBoundingBox(obj.bbox);
+        }
+        else if (isIBoundingBox(obj)) {
             initFromIBoundingBox(obj);
         }
-        else if (obj.lat != null) {
-            // assume single Geo.LatLongPt
-            initFromLatLongPt(obj);
+        else if (isLatLongPt(obj)) {
+            initFromPosition(obj.geometry.coordinates);
         }
-        else if (Array.isArray(obj) && (obj.length > 0) && obj[0].lat) {
-            // assume Geo.LatLongPt[]
-            initFromLatLongPt(obj[0]);
-            this.extend(obj);
+        else if (isPosition(obj)) {
+            initFromPosition(obj);
+        }
+        else if (isArrayOfPositions(obj)) {
+            var positions = obj;
+            initFromPosition(positions[0]);
+            this.extend(positions);
         }
         else {
             throw new Error('invalid BoundingBox.constructor');
@@ -63,40 +81,52 @@ var BoundingBox = (function () {
             this.extend(query_distance);
         }
     }
+    BoundingBox.prototype.left = function () { return this.bbox[0]; };
+    BoundingBox.prototype.bottom = function () { return this.bbox[1]; };
+    BoundingBox.prototype.right = function () { return this.bbox[2]; };
+    BoundingBox.prototype.top = function () { return this.bbox[3]; };
     BoundingBox.prototype.extend = function (obj) {
         var _this = this;
         var extendFromIBoundingBox = function (bbox) {
-            _this.left = Math.min(_this.left, bbox.left);
-            _this.bottom = Math.min(_this.bottom, bbox.bottom);
-            _this.right = Math.max(_this.right, bbox.right);
-            _this.top = Math.max(_this.top, bbox.top);
+            _this.bbox[0] = Math.min(_this.bbox[0], bbox[0]);
+            _this.bbox[1] = Math.min(_this.bbox[1], bbox[1]);
+            _this.bbox[2] = Math.max(_this.bbox[2], bbox[2]);
+            _this.bbox[3] = Math.max(_this.bbox[3], bbox[3]);
         };
-        var extendFromLatLongPt = function (point) {
-            _this.left = Math.min(_this.left, point.lng);
-            _this.bottom = Math.min(_this.bottom, point.lat);
-            _this.right = Math.max(_this.right, point.lng);
-            _this.top = Math.max(_this.top, point.lat);
+        var extendFromPosition = function (position) {
+            var lng = position[0];
+            var lat = position[1];
+            _this.bbox[0] = Math.min(_this.bbox[0], lng);
+            _this.bbox[1] = Math.min(_this.bbox[1], lat);
+            _this.bbox[2] = Math.max(_this.bbox[2], lng);
+            _this.bbox[3] = Math.max(_this.bbox[3], lat);
         };
         var extendByMeters = function (meters) {
             var findLatitudeFarthestFromEquator = function () {
-                return Math.max(Math.abs(_this.bottom), Math.abs(_this.top));
+                return Math.max(Math.abs(_this.bbox[1]), Math.abs(_this.bbox[3]));
             };
             var delta_lat = metersToLatitudeDistance(meters, findLatitudeFarthestFromEquator());
             var delta_lng = metersToLongitudeDistance(meters);
-            _this.top += delta_lng;
-            _this.bottom -= delta_lng;
-            _this.left -= delta_lat;
-            _this.right += delta_lat;
+            _this.bbox[0] -= delta_lat;
+            _this.bbox[1] -= delta_lng;
+            _this.bbox[2] += delta_lat;
+            _this.bbox[3] += delta_lng;
         };
-        if (obj.left != null) {
+        if (obj instanceof BoundingBox) {
+            extendFromIBoundingBox(obj.bbox);
+        }
+        else if (isIBoundingBox(obj)) {
             extendFromIBoundingBox(obj);
         }
-        else if (obj.lat != null) {
-            extendFromLatLongPt(obj);
+        else if (isLatLongPt(obj)) {
+            extendFromPosition(obj.geometry.coordinates);
         }
-        else if (Array.isArray(obj) && (obj.length > 0) && obj[0].lat) {
-            var points = obj;
-            points.forEach(function (pt) { extendFromLatLongPt(pt); });
+        else if (isPosition(obj)) {
+            extendFromPosition(obj);
+        }
+        else if (isArrayOfPositions(obj)) {
+            var positions = obj;
+            positions.forEach(function (position) { extendFromPosition(position); });
         }
         else if (typeof obj === 'number') {
             extendByMeters(obj);
@@ -110,33 +140,38 @@ var BoundingBox = (function () {
     BoundingBox.prototype.intersects = function (obj, query_distance) {
         var _this = this;
         var intersectsIBoundingBox = function (bbox, query_distance) {
-            if ((query_distance != null) && (query_distance > 0)) {
-                bbox = new BoundingBox(bbox, query_distance);
-            }
-            var overlaps_longitude = ((bbox.right >= _this.left) && (bbox.left <= _this.right));
+            function shouldExtend(query_distance) { return ((query_distance != null) && (query_distance > 0)); }
+            var main = shouldExtend(query_distance) ? new BoundingBox(_this, query_distance) : _this;
+            var overlaps_longitude = ((bbox[2] >= _this.left()) && (bbox[0] <= _this.right()));
             if (!overlaps_longitude) {
                 return false;
             }
-            var overlaps_latitude = ((bbox.bottom <= _this.top) && (bbox.top >= _this.bottom));
+            var overlaps_latitude = ((bbox[1] <= _this.top()) && (bbox[3] >= _this.bottom()));
             return overlaps_latitude;
         };
-        var intersectsLatLongPt = function (pt, query_distance) {
+        var intersectsPosition = function (pt, query_distance) {
             if ((query_distance != null) && (query_distance > 0)) {
                 var bbox = new BoundingBox(pt, query_distance);
                 return _this.intersects(bbox);
             }
-            var overlaps_longitude = ((pt.lng >= _this.left) && (pt.lng <= _this.right));
+            var overlaps_longitude = ((pt[0] >= _this.left()) && (pt[0] <= _this.right()));
             if (!overlaps_longitude) {
                 return false;
             }
-            var overlaps_latitude = ((pt.lat <= _this.top) && (pt.lat >= _this.bottom));
+            var overlaps_latitude = ((pt[1] <= _this.top()) && (pt[1] >= _this.bottom()));
             return overlaps_latitude;
         };
-        if (obj.left != null) {
+        if (obj instanceof BoundingBox) {
+            return intersectsIBoundingBox(obj.bbox, query_distance);
+        }
+        else if (isIBoundingBox(obj)) {
             return intersectsIBoundingBox(obj, query_distance);
         }
-        else if (obj.lat != null) {
-            return intersectsLatLongPt(obj, query_distance);
+        else if (isLatLongPt(obj)) {
+            return intersectsPosition(obj.geometry.coordinates, query_distance);
+        }
+        else if (isPosition(obj)) {
+            return intersectsPosition(obj, query_distance);
         }
         else {
             throw new Error('unsupported type');
@@ -146,12 +181,12 @@ var BoundingBox = (function () {
 }());
 exports.BoundingBox = BoundingBox;
 function mergeBoundingBoxes(a, b) {
-    return {
-        left: Math.min(a.left, b.left),
-        bottom: Math.min(a.bottom, b.bottom),
-        right: Math.max(a.right, b.right),
-        top: Math.max(a.top, b.top)
-    };
+    return [
+        Math.min(a[0], b[0]),
+        Math.min(a[1], b[1]),
+        Math.max(a[2], b[2]),
+        Math.max(a[3], b[3])
+    ];
 }
 exports.mergeBoundingBoxes = mergeBoundingBoxes;
 function createSpatialIndexForPath(path, max_unindexed_length, start, end) {
@@ -172,23 +207,23 @@ function createSpatialIndexForPath(path, max_unindexed_length, start, end) {
         };
     }
     else {
-        var left = path[start].lng;
+        var left = path[start][0];
+        var bottom = path[start][1];
         var right = left;
-        var top_1 = path[start].lat;
-        var bottom = top_1;
+        var top_1 = bottom;
         for (var i = start + 1; i <= end + 1; ++i) {
             var pt = path[i];
-            if (pt.lng < left)
-                left = pt.lng;
-            if (pt.lng > right)
-                right = pt.lng;
-            if (pt.lat > top_1)
-                top_1 = pt.lat;
-            if (pt.lat < bottom)
-                bottom = pt.lat;
+            if (pt[0] < left)
+                left = pt[0];
+            if (pt[0] > right)
+                right = pt[0];
+            if (pt[1] > top_1)
+                top_1 = pt[1];
+            if (pt[1] < bottom)
+                bottom = pt[1];
         }
         var index = {
-            bbox: { left: left, right: right, top: top_1, bottom: bottom },
+            bbox: [left, bottom, right, top_1],
             start: start, end: end
         };
     }
@@ -197,13 +232,14 @@ function createSpatialIndexForPath(path, max_unindexed_length, start, end) {
 exports.createSpatialIndexForPath = createSpatialIndexForPath;
 function findPathSegmentsFromPointInIndex(index, query_pt, query_distance) {
     var bbox = new BoundingBox(index.bbox, query_distance);
-    if (bbox.intersects(query_pt)) {
+    var feature = Array.isArray(query_pt) ? turf.point(query_pt) : query_pt;
+    if (bbox.intersects(feature)) {
         if (index.head || index.tail) {
             if (index.head) {
-                var segments = findPathSegmentsFromPointInIndex(index.head, query_pt, query_distance);
+                var segments = findPathSegmentsFromPointInIndex(index.head, feature, query_distance);
             }
             if (index.tail) {
-                var tail_segments = findPathSegmentsFromPointInIndex(index.tail, query_pt, query_distance);
+                var tail_segments = findPathSegmentsFromPointInIndex(index.tail, feature, query_distance);
                 if (tail_segments) {
                     if (segments) {
                         segments = segments.concat(tail_segments);
@@ -225,20 +261,14 @@ function findPathSegmentsFromPointInIndex(index, query_pt, query_distance) {
 }
 exports.findPathSegmentsFromPointInIndex = findPathSegmentsFromPointInIndex;
 function findCloseSegments(path, base_index, query_pt, query_distance) {
-    var coordinates = [];
-    path.forEach(function (pt) {
-        coordinates.push([pt.lng, pt.lat]);
-    });
-    var geo_path = turf.lineString(coordinates);
-    var geo_query_pt = turf.point([query_pt.lng, query_pt.lat]);
-    var pt_on_road = turf.pointOnLine(geo_path, geo_query_pt);
+    var pt_on_road = turf.pointOnLine(path, query_pt);
     var close_segments = [];
-    var distance_to_path = turf.distance(geo_query_pt, pt_on_road);
+    var distance_to_path = turf.distance(query_pt, pt_on_road);
     if ((query_distance == null) || (pt_on_road.properties.dist <= query_distance)) {
         var close_segment = {
             index: base_index + pt_on_road.properties.index,
             distance_to_path: distance_to_path,
-            pt_on_segment: { lat: pt_on_road.geometry.coordinates[1], lng: pt_on_road.geometry.coordinates[0] }
+            pt_on_segment: pt_on_road
         };
         close_segments.push(close_segment);
     }
@@ -246,11 +276,13 @@ function findCloseSegments(path, base_index, query_pt, query_distance) {
 }
 function findCloseSegmentsNearPoint(path, index, query_pt, query_distance) {
     var all_close_segments = [];
-    var path_segments = findPathSegmentsFromPointInIndex(index, query_pt, query_distance);
+    var feature = Array.isArray(query_pt) ? turf.point(query_pt) : query_pt;
+    var path_segments = findPathSegmentsFromPointInIndex(index, feature, query_distance);
     if (path_segments) {
         path_segments.forEach(function (path_segment) {
-            var segment = path.slice(path_segment.start, path_segment.end + 2);
-            var close_segments = findCloseSegments(segment, path_segment.start, query_pt, query_distance);
+            var coordinates = path.geometry.coordinates.slice(path_segment.start, path_segment.end + 2);
+            var segment = turf.lineString(coordinates);
+            var close_segments = findCloseSegments(segment, path_segment.start, feature, query_distance);
             all_close_segments = all_close_segments.concat(close_segments);
         });
     }

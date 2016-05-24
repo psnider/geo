@@ -1,20 +1,9 @@
 declare namespace Geo {
 
-    interface LatLongPt {
-        lat: number
-        lng: number
-    }
-
-
-    interface IBoundingBox {
-        left: number
-        bottom: number
-        right: number
-        top: number
-    }
-
-
-    type Path = LatLongPt[]
+    type LatLongPt = GeoJSON.Feature<GeoJSON.Point>
+    type Path = GeoJSON.Feature<GeoJSON.LineString>
+    // A bounding box (from turf.js) as an array in WSEN order (west, south, east, north)
+    type IBoundingBox = Array<number>
 
 
     interface CloseSegment {
@@ -44,7 +33,7 @@ declare namespace Geo {
 }
 
 
-declare module 'geo' {
+declare module 'geo-find-close-polylines' {
 
     const METERS_PER_DEGREE_AT_EQUATOR: number
     function radiansToDegrees(radians: number): number
@@ -54,21 +43,17 @@ declare module 'geo' {
     function latitudeDistanceToMeters(latitude_distance: number, latitude: number)
     function longitudeDistanceToMeters(longitude_distance: number)
 
-    class BoundingBox implements Geo.IBoundingBox {
-        left: number
-        right: number
-        top: number
-        bottom: number
-        constructor(bbox: Geo.IBoundingBox)
-        constructor(point: Geo.LatLongPt)
-        constructor(points: Geo.LatLongPt[])
-        extend(bbox: Geo.IBoundingBox)
-        extend(point: Geo.LatLongPt)
-        extend(points: Geo.LatLongPt[])
+    class BoundingBox {
+        bbox: Geo.IBoundingBox
+        constructor(bbox: BoundingBox | Geo.IBoundingBox, query_distance?: number)
+        constructor(point: Geo.LatLongPt | Position, query_distance?: number)
+        constructor(points: GeoJSON.Position[], query_distance?: number)
+        extend(bbox: BoundingBox | Geo.IBoundingBox)
+        extend(point: Geo.LatLongPt | Position)
+        extend(points: GeoJSON.Position[])
         extend(distance_m: number)
-        intersects(bbox: BoundingBox): boolean
-        intersects(point: Geo.LatLongPt): boolean
-        intersects(points: Geo.LatLongPt[]): boolean
+        intersects(bbox: BoundingBox | Geo.IBoundingBox, query_distance?: number): boolean
+        intersects(point: Geo.LatLongPt | GeoJSON.Position, query_distance?: number): boolean
     }
 
     function mergeBoundingBoxes(a: Geo.IBoundingBox, b: Geo.IBoundingBox): Geo.IBoundingBox
@@ -81,18 +66,18 @@ declare module 'geo' {
     //     A segment N is bounded by points N and N+1
     // @param end: The index of the last segment to index.
     // @return: The spatial index for this path.
-    function createSpatialIndexForPath(path: Geo.Path, max_unindexed_length?: number, start?: number, end?: number): Geo.SpatialIndexOnPath
+    function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number): Geo.SpatialIndexOnPath
 
     // @param index: The spatial index to search.
     // @param query_pt: The point to search for.
     // @param query_distance: The distance within which to search for the point.
     // @return: Indexes to the segments from the index that match the query.
-    function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt, query_distance?: number): Geo.PathSegments[]
+    function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, query_distance?: number): Geo.PathSegments[]
 
     // @param path: The path to index. Normally, this is the only argument.
     // @param query_pt: The point near which to find path segments.
     // @param distance_m: The distance in meters within which the query point must lie of the segments.
     // @return: An array of the segments that match the query.
-    function findCloseSegmentsNearPoint(path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt, distance_m?: number): Geo.CloseSegment[]
+    function findCloseSegmentsNearPoint(path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, distance_m?: number): Geo.CloseSegment[]
 
 }
