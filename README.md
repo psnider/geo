@@ -12,10 +12,10 @@ Merge two bounding boxes.
 parameters: (a: Geo.IBoundingBox, b: Geo.IBoundingBox)  
 returns: Geo.IBoundingBox
 - createSpatialIndexForPath  
-parameters: (path: Geo.Path, max_unindexed_length?: number, start?: number, end?: number)  
+parameters: (path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number)  
 returns: Geo.SpatialIndexOnPath
 - findCloseSegmentsNearPoint  
-parameters: (path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt, distance_m?: number)  
+parameters: (path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, distance_m?: number)
 returns: Geo.CloseSegment[]
 
 See [geo.d.ts](geo.d.ts) for the detailed declarations.
