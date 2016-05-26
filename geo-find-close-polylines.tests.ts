@@ -242,7 +242,6 @@ describe('geo', function() {
         }
 
 
-
         it('should not return segments when pt is farther than distance', function() {
             let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [1, 0.001], 80)
             expect(segments).to.have.lengthOf(0)
@@ -252,15 +251,16 @@ describe('geo', function() {
         it('should return a segment when pt is closer than distance', function() {
             let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [0.5, 0.001], 120)
             expect(segments).to.have.lengthOf(1)
-            expect(segments[0].index).to.equal(0)
+            expect(segments[0].segment_index).to.equal(0)
+            expect(segments[0].distance_to_path).to.be.closeTo(111, 0.5)
         })
 
 
         it('should return 2 segments when pt is close to 2 segments', function() {
             let segments = geo.findCloseSegmentsNearPoint(line, INDEX, [1, 0.001], 120)
             expect(segments).to.have.lengthOf(2)
-            expect(segments[0].index).to.equal(0)
-            expect(segments[1].index).to.equal(1)
+            expect(segments[0].segment_index).to.equal(0)
+            expect(segments[1].segment_index).to.equal(1)
         })
 
     })

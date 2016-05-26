@@ -253,13 +253,14 @@ export function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, 
 }
 
 
+// @param base_index: The index of this segment as part of an associated set of polylines.
 function findCloseSegments(path: Geo.Path, base_index: number, query_pt: Geo.LatLongPt, query_distance: number): Geo.CloseSegment[] {
     var pt_on_road = turf.pointOnLine(path, query_pt)
     var close_segments = []
-    var distance_to_path = turf.distance(query_pt, pt_on_road)
+    var distance_to_path = turf.distance(query_pt, pt_on_road) * 1000
     if ((query_distance == null) || (pt_on_road.properties.dist <= query_distance)) {
         var close_segment: Geo.CloseSegment = {
-            index: base_index + pt_on_road.properties.index,
+            segment_index: base_index + pt_on_road.properties.index,
             distance_to_path,
             pt_on_segment: pt_on_road
         }

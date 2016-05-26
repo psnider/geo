@@ -6,8 +6,9 @@ declare namespace Geo {
     type IBoundingBox = Array<number>
 
 
+    // TODO: convert this to a segment feature
     interface CloseSegment {
-        index: number
+        segment_index: number
         distance_to_path: number
         pt_on_segment: LatLongPt
     }
