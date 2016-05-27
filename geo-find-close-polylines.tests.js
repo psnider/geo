@@ -1,6 +1,7 @@
 "use strict";
 var CHAI = require('chai');
 var expect = CHAI.expect;
+var turf = require('turf');
 var geo = require('./geo-find-close-polylines');
 describe('geo', function () {
     describe('conversion', function () {
@@ -144,6 +145,29 @@ describe('geo', function () {
                 var match = geo.findPathSegmentsFromPointInIndex(INDEX, [10.001, 0], 80);
                 expect(match).to.be.null;
             });
+        });
+    });
+    describe('findCloseSegments', function () {
+        var line = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [
+                    [0, 0],
+                    [1, 0]
+                ]
+            },
+            properties: {}
+        };
+        it('should return segments when pt is closer than distance', function () {
+            var query_pt = turf.point([0.5, 0.001]);
+            var close_segments = geo.test.findCloseSegments(line, 0, query_pt, 112);
+            expect(close_segments).to.have.lengthOf(1);
+        });
+        it('should not return segments when pt is farther than distance', function () {
+            var query_pt = turf.point([0.5, 0.001]);
+            var close_segments = geo.test.findCloseSegments(line, 0, query_pt, 110);
+            expect(close_segments).to.have.lengthOf(0);
         });
     });
     describe('findCloseSegmentsNearPoint', function () {

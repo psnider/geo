@@ -81,4 +81,8 @@ declare module 'geo-find-close-polylines' {
     // @return: An array of the segments that match the query.
     function findCloseSegmentsNearPoint(path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, distance_m?: number): Geo.CloseSegment[]
 
+
+    var test: {
+        findCloseSegments: (path: Geo.Path, base_index: number, query_pt: Geo.LatLongPt, query_distance: number) => Geo.CloseSegment[]
+    }
 }

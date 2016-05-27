@@ -265,7 +265,7 @@ function findCloseSegments(path, base_index, query_pt, query_distance) {
     var pt_on_road = turf.pointOnLine(path, query_pt);
     var close_segments = [];
     var distance_to_path = turf.distance(query_pt, pt_on_road) * 1000;
-    if ((query_distance == null) || (pt_on_road.properties.dist <= query_distance)) {
+    if ((query_distance == null) || (distance_to_path <= query_distance)) {
         var close_segment = {
             segment_index: base_index + pt_on_road.properties.index,
             distance_to_path: distance_to_path,
@@ -290,3 +290,6 @@ function findCloseSegmentsNearPoint(path, index, query_pt, query_distance) {
     return all_close_segments;
 }
 exports.findCloseSegmentsNearPoint = findCloseSegmentsNearPoint;
+exports.test = {
+    findCloseSegments: findCloseSegments
+};
