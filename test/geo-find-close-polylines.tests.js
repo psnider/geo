@@ -1,9 +1,9 @@
 "use strict";
-/// <reference path="../types.d.ts"/>
+/// <reference path="geo-find-close-polylines.d.ts"/>
 var CHAI = require('chai');
 var expect = CHAI.expect;
 var turf = require('turf');
-var Geo = require('../geo-find-close-polylines');
+var Geo = require('./geo-find-close-polylines');
 describe('geo', function () {
     describe('conversion', function () {
         var LAT_DISTANCE_TO_METERS = {

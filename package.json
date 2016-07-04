@@ -4,7 +4,7 @@
   "description": "Quickly find the closest line segments of a polyline on the earth's surface.",
   "main": "geo-find-close-polylines.js",
   "scripts": {
-    "build": "tsc --project .",
+    "build": "tsc --project src; tsc --project test",
     "clean": "rm -f geo-find-close-polylines.js geo-find-close-polylines.tests.js",
     "test": "mocha ./geo-find-close-polylines.tests.js"
   },
@@ -20,5 +20,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "typescript": "^1.8.10"
-  }
+  },
+  "typings": "geo-find-close-polylines.d.ts"
 }

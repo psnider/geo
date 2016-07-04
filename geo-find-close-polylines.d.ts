@@ -1,88 +1,53 @@
-declare namespace Geo {
-
-    type LatLongPt = GeoJSON.Feature<GeoJSON.Point>
-    type Path = GeoJSON.Feature<GeoJSON.LineString>
-    // A bounding box (from turf.js) as an array in WSEN order (west, south, east, north)
-    type IBoundingBox = Array<number>
+/// <reference path="./typings/geojson/geojson.d.ts"/>
 
 
-    // TODO: convert this to a segment feature
-    interface CloseSegment {
-        segment_index: number
-        distance_to_path: number
-        pt_on_segment: LatLongPt
-    }
 
+export const METERS_PER_DEGREE_AT_EQUATOR: number
+export function radiansToDegrees(radians: number): number
+export function degreeToRadians(degrees: number): number
+export function metersToLatitudeDistance(meters: number, latitude: number)
+export function metersToLongitudeDistance(meters: number)
+export function latitudeDistanceToMeters(latitude_distance: number, latitude: number)
+export function longitudeDistanceToMeters(longitude_distance: number)
 
-    interface PathSegments {
-        // segment index into path of start of this indexed section
-        start: number
-        // segment index into path of end of this indexed section
-        end: number
-    }
-
-
-    interface SpatialIndexOnPath extends PathSegments {
-        bbox: IBoundingBox
-        // an index on the leading portion of this subpath
-        // head and tail must be used together
-        head?: SpatialIndexOnPath
-        // an index on the trailing portion of this subpath
-        tail?: SpatialIndexOnPath
-    }
-
+export class BoundingBox {
+    bbox: GFCP.IBoundingBox
+    constructor(bbox: BoundingBox | GFCP.IBoundingBox, query_distance?: number)
+    constructor(point: GFCP.LatLongPt | Position, query_distance?: number)
+    constructor(points: GeoJSON.Position[], query_distance?: number)
+    extend(bbox: BoundingBox | GFCP.IBoundingBox)
+    extend(point: GFCP.LatLongPt | Position)
+    extend(points: GeoJSON.Position[])
+    extend(distance_m: number)
+    intersects(bbox: BoundingBox | GFCP.IBoundingBox, query_distance?: number): boolean
+    intersects(point: GFCP.LatLongPt | GeoJSON.Position, query_distance?: number): boolean
 }
 
-
-declare module 'geo-find-close-polylines' {
-
-    const METERS_PER_DEGREE_AT_EQUATOR: number
-    function radiansToDegrees(radians: number): number
-    function degreeToRadians(degrees: number): number
-    function metersToLatitudeDistance(meters: number, latitude: number)
-    function metersToLongitudeDistance(meters: number)
-    function latitudeDistanceToMeters(latitude_distance: number, latitude: number)
-    function longitudeDistanceToMeters(longitude_distance: number)
-
-    class BoundingBox {
-        bbox: Geo.IBoundingBox
-        constructor(bbox: BoundingBox | Geo.IBoundingBox, query_distance?: number)
-        constructor(point: Geo.LatLongPt | Position, query_distance?: number)
-        constructor(points: GeoJSON.Position[], query_distance?: number)
-        extend(bbox: BoundingBox | Geo.IBoundingBox)
-        extend(point: Geo.LatLongPt | Position)
-        extend(points: GeoJSON.Position[])
-        extend(distance_m: number)
-        intersects(bbox: BoundingBox | Geo.IBoundingBox, query_distance?: number): boolean
-        intersects(point: Geo.LatLongPt | GeoJSON.Position, query_distance?: number): boolean
-    }
-
-    function mergeBoundingBoxes(a: Geo.IBoundingBox, b: Geo.IBoundingBox): Geo.IBoundingBox
+export function mergeBoundingBoxes(a: GFCP.IBoundingBox, b: GFCP.IBoundingBox): GFCP.IBoundingBox
 
 
-    // @param path: The path to index. Normally, this is the only argument.
-    // @param  max_unindexed_length: The maximum number of segments to remain unindexed.
-    //     Defaults to 32.
-    // @param start: The index of the first segment to index.
-    //     A segment N is bounded by points N and N+1
-    // @param end: The index of the last segment to index.
-    // @return: The spatial index for this path.
-    function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number): Geo.SpatialIndexOnPath
+// @param path: The path to index. Normally, this is the only argument.
+// @param  max_unindexed_length: The maximum number of segments to remain unindexed.
+//     Defaults to 32.
+// @param start: The index of the first segment to index.
+//     A segment N is bounded by points N and N+1
+// @param end: The index of the last segment to index.
+// @return: The spatial index for this path.
+export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number): GFCP.SpatialIndexOnPath
 
-    // @param index: The spatial index to search.
-    // @param query_pt: The point to search for.
-    // @param query_distance: The distance within which to search for the point.
-    // @return: Indexes to the segments from the index that match the query.
-    function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, query_distance?: number): Geo.PathSegments[]
+// @param index: The spatial index to search.
+// @param query_pt: The point to search for.
+// @param query_distance: The distance within which to search for the point.
+// @return: Indexes to the segments from the index that match the query.
+export function findPathSegmentsFromPointInIndex(index: GFCP.SpatialIndexOnPath, query_pt: GFCP.LatLongPt | GeoJSON.Position, query_distance?: number): GFCP.PathSegments[]
 
-    // @param path: The path to index. Normally, this is the only argument.
-    // @param query_pt: The point near which to find path segments.
-    // @param distance_m: The distance in meters within which the query point must lie of the segments.
-    // @return: An array of the segments that match the query.
-    function findCloseSegmentsNearPoint(path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, distance_m?: number): Geo.CloseSegment[]
+// @param path: The path to index. Normally, this is the only argument.
+// @param query_pt: The point near which to find path segments.
+// @param distance_m: The distance in meters within which the query point must lie of the segments.
+// @return: An array of the segments that match the query.
+export function findCloseSegmentsNearPoint(path: GFCP.Path, index: GFCP.SpatialIndexOnPath, query_pt: GFCP.LatLongPt | GeoJSON.Position, distance_m?: number): GFCP.CloseSegment[]
 
 
-    var test: {
-        findCloseSegments: (path: Geo.Path, base_index: number, query_pt: Geo.LatLongPt, query_distance: number) => Geo.CloseSegment[]
-    }
+export var test: {
+    findCloseSegments: (path: GFCP.Path, base_index: number, query_pt: GFCP.LatLongPt, query_distance: number) => GFCP.CloseSegment[]
 }

@@ -1,5 +1,5 @@
 {
-    "version": "1.5.3",
+    "version": "1.8.10",
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
@@ -7,7 +7,7 @@
         "noImplicitAny": false,
         "removeComments": false,
         "noLib": false,
-        "outDir": "."
+        "outDir": ".."
     },
     "scripts": {
         "postbuild": "echo after building"
@@ -28,12 +28,12 @@
     },
     "files": [
         "geo-find-close-polylines.ts",
-        "geo-find-close-polylines.tests.ts",
-        "geo-find-close-polylines.d.ts",
-        "typings/assertion-error/assertion-error.d.ts",
-        "typings/chai/chai.d.ts",
-        "typings/mocha/mocha.d.ts",
-        "typings/node/node.d.ts",
-        "typings/turf/turf.d.ts"
+        "../geo-find-close-polylines.d.ts",
+        "../typings/assertion-error/assertion-error.d.ts",
+        "../typings/chai/chai.d.ts",
+        "../typings/geojson/geojson.d.ts",
+        "../typings/mocha/mocha.d.ts",
+        "../typings/node/node.d.ts",
+        "../typings/turf/turf.d.ts"
     ]
 }

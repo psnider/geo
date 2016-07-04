@@ -1,0 +1,39 @@
+{
+    "version": "1.8.10",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": false,
+        "noLib": false,
+        "outDir": ".."
+    },
+    "scripts": {
+        "postbuild": "echo after building"
+    },
+    "formatCodeOptions": {
+        "indentSize": 4,
+        "tabSize": 4,
+        "newLineCharacter": "\n",
+        "convertTabsToSpaces": true,
+        "insertSpaceAfterCommaDelimiter": true,
+        "insertSpaceAfterSemicolonInForStatements": true,
+        "insertSpaceBeforeAndAfterBinaryOperators": true,
+        "insertSpaceAfterKeywordsInControlFlowStatements": true,
+        "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+        "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+        "placeOpenBraceOnNewLineForFunctions": false,
+        "placeOpenBraceOnNewLineForControlBlocks": false
+    },
+    "files": [
+        "geo-find-close-polylines.tests.ts",
+        "../geo-find-close-polylines.d.ts",
+        "../typings/assertion-error/assertion-error.d.ts",
+        "../typings/chai/chai.d.ts",
+        "../typings/geojson/geojson.d.ts",
+        "../typings/mocha/mocha.d.ts",
+        "../typings/node/node.d.ts",
+        "../typings/turf/turf.d.ts"
+    ]
+}

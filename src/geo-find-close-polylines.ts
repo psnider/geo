@@ -1,4 +1,7 @@
-import turf = require('turf')
+/// <reference path="../types.d.ts"/>
+import * as turf from 'turf'
+//import * as gfcp from './geo-find-close-polylines'
+import Geo = require('./geo-find-close-polylines')
 
 export const METERS_PER_DEGREE_AT_EQUATOR = 111111
 
@@ -41,7 +44,7 @@ function isIBoundingBox(obj: any) {
 
 
 function isLatLongPt(obj: any) {
-    return (((<Geo.LatLongPt>obj).geometry) && ((<Geo.LatLongPt>obj).geometry.type == 'Point'))
+    return (((<GFCP.LatLongPt>obj).geometry) && ((<GFCP.LatLongPt>obj).geometry.type == 'Point'))
 }
 
 
@@ -62,9 +65,9 @@ function isArrayOfPositions(obj: any) {
 
 // This uses simple math, and doesnt account for crossing the 180 longitude.
 export class BoundingBox {
-    bbox: Geo.IBoundingBox
-    constructor(obj: BoundingBox | Geo.IBoundingBox | Geo.LatLongPt | Position | GeoJSON.Position[], query_distance?: number) {
-        var initFromIBoundingBox = (bbox: Geo.IBoundingBox): void => {
+    bbox: GFCP.IBoundingBox
+    constructor(obj: BoundingBox | GFCP.IBoundingBox | GFCP.LatLongPt | Position | GeoJSON.Position[], query_distance?: number) {
+        var initFromIBoundingBox = (bbox: GFCP.IBoundingBox): void => {
             this.bbox = [].concat(bbox)
         }
         var initFromPosition = (position: GeoJSON.Position): void => {
@@ -75,9 +78,9 @@ export class BoundingBox {
         if (obj instanceof BoundingBox) {
             initFromIBoundingBox((<BoundingBox>obj).bbox)
         } else if (isIBoundingBox(obj)) {
-            initFromIBoundingBox(<Geo.IBoundingBox>obj)
+            initFromIBoundingBox(<GFCP.IBoundingBox>obj)
         } else if (isLatLongPt(obj)) {
-            initFromPosition((<Geo.LatLongPt>obj).geometry.coordinates)
+            initFromPosition((<GFCP.LatLongPt>obj).geometry.coordinates)
         } else if (isPosition(obj)) {
             initFromPosition(<GeoJSON.Position>obj)
         } else if (isArrayOfPositions(obj)) {
@@ -95,8 +98,8 @@ export class BoundingBox {
     bottom(): number {return this.bbox[1]}
     right(): number {return this.bbox[2]}
     top(): number {return this.bbox[3]}
-    extend(obj: BoundingBox | Geo.IBoundingBox | Geo.LatLongPt | Position | GeoJSON.Position[] | number) {
-        var extendFromIBoundingBox = (bbox: Geo.IBoundingBox): void => {
+    extend(obj: BoundingBox | GFCP.IBoundingBox | GFCP.LatLongPt | Position | GeoJSON.Position[] | number) {
+        var extendFromIBoundingBox = (bbox: GFCP.IBoundingBox): void => {
             this.bbox[0] = Math.min(this.bbox[0], bbox[0])
             this.bbox[1] = Math.min(this.bbox[1], bbox[1])
             this.bbox[2] = Math.max(this.bbox[2], bbox[2])
@@ -124,9 +127,9 @@ export class BoundingBox {
         if (obj instanceof BoundingBox) {
             extendFromIBoundingBox((<BoundingBox>obj).bbox)
         } else if (isIBoundingBox(obj)) {
-            extendFromIBoundingBox(<Geo.IBoundingBox>obj)
+            extendFromIBoundingBox(<GFCP.IBoundingBox>obj)
         } else if (isLatLongPt(obj)) {
-            extendFromPosition((<Geo.LatLongPt>obj).geometry.coordinates)
+            extendFromPosition((<GFCP.LatLongPt>obj).geometry.coordinates)
         } else if (isPosition(obj)) {
             extendFromPosition(<GeoJSON.Position>obj)
         } else if (isArrayOfPositions(obj)) {
@@ -139,9 +142,9 @@ export class BoundingBox {
         }
     }
     // TODO: requires line segment math
-    // TODO: intersects(pts: Geo.LatLongPt[]): boolean
-    intersects(obj: BoundingBox | Geo.IBoundingBox | Geo.LatLongPt | GeoJSON.Position, query_distance?: number): boolean {
-        var intersectsIBoundingBox = (bbox: Geo.IBoundingBox, query_distance?: number): boolean => {
+    // TODO: intersects(pts: GFCP.LatLongPt[]): boolean
+    intersects(obj: BoundingBox | GFCP.IBoundingBox | GFCP.LatLongPt | GeoJSON.Position, query_distance?: number): boolean {
+        var intersectsIBoundingBox = (bbox: GFCP.IBoundingBox, query_distance?: number): boolean => {
             function shouldExtend(query_distance) {return ((query_distance != null) && (query_distance > 0))}
             var main = shouldExtend(query_distance) ? new BoundingBox(this, query_distance) : this
             let overlaps_longitude = ((bbox[2] >= this.left()) && (bbox[0] <= this.right()))
@@ -166,9 +169,9 @@ export class BoundingBox {
         if (obj instanceof BoundingBox) {
             return intersectsIBoundingBox((<BoundingBox>obj).bbox, query_distance)
         } else if (isIBoundingBox(obj)) {
-            return intersectsIBoundingBox(<Geo.IBoundingBox>obj, query_distance)
+            return intersectsIBoundingBox(<GFCP.IBoundingBox>obj, query_distance)
         } else if (isLatLongPt(obj)) {
-            return intersectsPosition((<Geo.LatLongPt>obj).geometry.coordinates, query_distance)
+            return intersectsPosition((<GFCP.LatLongPt>obj).geometry.coordinates, query_distance)
         } else if (isPosition(obj)) {
             return intersectsPosition(<GeoJSON.Position>obj, query_distance)
         } else {
@@ -179,7 +182,7 @@ export class BoundingBox {
 
 
 
-export function mergeBoundingBoxes(a: Geo.IBoundingBox, b: Geo.IBoundingBox): Geo.IBoundingBox {
+export function mergeBoundingBoxes(a: GFCP.IBoundingBox, b: GFCP.IBoundingBox): GFCP.IBoundingBox {
     return [
         Math.min(a[0], b[0]),
         Math.min(a[1], b[1]),
@@ -189,7 +192,7 @@ export function mergeBoundingBoxes(a: Geo.IBoundingBox, b: Geo.IBoundingBox): Ge
 }
 
 
-export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number): Geo.SpatialIndexOnPath {
+export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexed_length?: number, start?: number, end?: number): GFCP.SpatialIndexOnPath {
     if (max_unindexed_length == null) max_unindexed_length = 32
     if (start == null) {
         start = 0
@@ -199,7 +202,7 @@ export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexe
         let mid = Math.floor((start + end) / 2)
         let head = createSpatialIndexForPath(path, max_unindexed_length, start, mid)
         let tail = createSpatialIndexForPath(path, max_unindexed_length, mid + 1, end)
-        var index: Geo.SpatialIndexOnPath = {
+        var index: GFCP.SpatialIndexOnPath = {
             bbox: mergeBoundingBoxes(head.bbox, tail.bbox),
             start, end,
             head, tail
@@ -216,7 +219,7 @@ export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexe
             if (pt[1] > top) top = pt[1]
             if (pt[1] < bottom) bottom = pt[1]
         }
-        var index: Geo.SpatialIndexOnPath = {
+        var index: GFCP.SpatialIndexOnPath = {
             bbox: [left, bottom, right, top],
             start, end
         }
@@ -225,7 +228,7 @@ export function createSpatialIndexForPath(path: GeoJSON.Position[], max_unindexe
 }
 
 
-export function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, query_distance?: number): Geo.PathSegments[] {
+export function findPathSegmentsFromPointInIndex(index: GFCP.SpatialIndexOnPath, query_pt: GFCP.LatLongPt | GeoJSON.Position, query_distance?: number): GFCP.PathSegments[] {
     var bbox = new BoundingBox(index.bbox, query_distance)
     var feature = Array.isArray(query_pt) ? turf.point(query_pt) : query_pt
     if (bbox.intersects(feature)) {
@@ -254,12 +257,12 @@ export function findPathSegmentsFromPointInIndex(index: Geo.SpatialIndexOnPath, 
 
 
 // @param base_index: The index of this segment as part of an associated set of polylines.
-function findCloseSegments(path: Geo.Path, base_index: number, query_pt: Geo.LatLongPt, query_distance: number): Geo.CloseSegment[] {
+function findCloseSegments(path: GFCP.Path, base_index: number, query_pt: GFCP.LatLongPt, query_distance: number): GFCP.CloseSegment[] {
     var pt_on_road = turf.pointOnLine(path, query_pt)
     var close_segments = []
     var distance_to_path = turf.distance(query_pt, pt_on_road) * 1000
     if ((query_distance == null) || (distance_to_path <= query_distance)) {
-        var close_segment: Geo.CloseSegment = {
+        var close_segment: GFCP.CloseSegment = {
             segment_index: base_index + pt_on_road.properties.index,
             distance_to_path,
             pt_on_segment: pt_on_road
@@ -270,7 +273,7 @@ function findCloseSegments(path: Geo.Path, base_index: number, query_pt: Geo.Lat
 }
 
 
-export function findCloseSegmentsNearPoint(path: Geo.Path, index: Geo.SpatialIndexOnPath, query_pt: Geo.LatLongPt | GeoJSON.Position, query_distance: number): Geo.CloseSegment[] {
+export function findCloseSegmentsNearPoint(path: GFCP.Path, index: GFCP.SpatialIndexOnPath, query_pt: GFCP.LatLongPt | GeoJSON.Position, query_distance: number): GFCP.CloseSegment[] {
     var all_close_segments = []
     var feature = Array.isArray(query_pt) ? turf.point(query_pt) : query_pt
     var path_segments = findPathSegmentsFromPointInIndex(index, feature, query_distance)

@@ -1,4 +1,5 @@
 "use strict";
+/// <reference path="../types.d.ts"/>
 var turf = require('turf');
 exports.METERS_PER_DEGREE_AT_EQUATOR = 111111;
 function radiansToDegrees(radians) {
@@ -136,7 +137,7 @@ var BoundingBox = (function () {
         }
     };
     // TODO: requires line segment math
-    // TODO: intersects(pts: Geo.LatLongPt[]): boolean
+    // TODO: intersects(pts: GFCP.LatLongPt[]): boolean
     BoundingBox.prototype.intersects = function (obj, query_distance) {
         var _this = this;
         var intersectsIBoundingBox = function (bbox, query_distance) {
