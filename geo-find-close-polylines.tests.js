@@ -1,5 +1,4 @@
 "use strict";
-/// <reference path="../types.d.ts"/>
 var CHAI = require('chai');
 var expect = CHAI.expect;
 var turf = require('turf');

@@ -1,5 +1,4 @@
 "use strict";
-/// <reference path="../types.d.ts"/>
 var turf = require('turf');
 exports.METERS_PER_DEGREE_AT_EQUATOR = 111111;
 function radiansToDegrees(radians) {

@@ -1,4 +1,3 @@
-/// <reference path="../types.d.ts"/>
 import CHAI                 = require('chai')
 const  expect               = CHAI.expect
 import turf                 = require('turf')
@@ -61,28 +60,28 @@ describe('geo', function() {
     describe('mergeBoundingBoxes', function() {
 
         it('should merge box contained in box', function() {
-            var contained: GFCP.IBoundingBox = [-1, 1, 1, 1]
-            var container: GFCP.IBoundingBox = [-2, -2, 2, 2]
+            var contained: Geo.IBoundingBox = [-1, 1, 1, 1]
+            var container: Geo.IBoundingBox = [-2, -2, 2, 2]
             var merged = Geo.mergeBoundingBoxes(contained, container)
-            var expected: GFCP.IBoundingBox = [-2, -2, 2, 2]
+            var expected: Geo.IBoundingBox = [-2, -2, 2, 2]
             expect(merged).to.deep.equal(expected)
         })
 
 
         it('should merge boxes that overlap', function() {
-            var a: GFCP.IBoundingBox = [-2, -2, 2, 2]
-            var b: GFCP.IBoundingBox = [1, 1, 3, 3]
+            var a: Geo.IBoundingBox = [-2, -2, 2, 2]
+            var b: Geo.IBoundingBox = [1, 1, 3, 3]
             var merged = Geo.mergeBoundingBoxes(a, b)
-            var expected: GFCP.IBoundingBox = [-2, -2, 3, 3]
+            var expected: Geo.IBoundingBox = [-2, -2, 3, 3]
             expect(merged).to.deep.equal(expected)
         })
 
 
         it('should merge boxes that dont overlap', function() {
-            var a: GFCP.IBoundingBox = [-2, -2, -1, -1]
-            var b: GFCP.IBoundingBox = [1, 1, 2, 2]
+            var a: Geo.IBoundingBox = [-2, -2, -1, -1]
+            var b: Geo.IBoundingBox = [1, 1, 2, 2]
             var merged = Geo.mergeBoundingBoxes(a, b)
-            var expected: GFCP.IBoundingBox = [-2, -2, 2, 2]
+            var expected: Geo.IBoundingBox = [-2, -2, 2, 2]
             expect(merged).to.deep.equal(expected)
         })
 
@@ -101,15 +100,15 @@ describe('geo', function() {
 
 
         it('should not create a sub-index for a line that is shorter than the max_unindexed_length', function() {
-            var index: GFCP.SpatialIndexOnPath = Geo.createSpatialIndexForPath(pts)
+            var index: Geo.SpatialIndexOnPath = Geo.createSpatialIndexForPath(pts)
             var expected = {bbox: [0, 0, 4, 1], start: 0, end: 3}
             expect(index).to.deep.equal(expected)
         })
 
 
         it('should create a sub-index for a line that is longer than the max_unindexed_length', function() {
-            var index: GFCP.SpatialIndexOnPath = Geo.createSpatialIndexForPath(pts, 2)
-            var expected: GFCP.SpatialIndexOnPath = {bbox: [0, 0, 4, 1], start: 0, end: 3}
+            var index: Geo.SpatialIndexOnPath = Geo.createSpatialIndexForPath(pts, 2)
+            var expected: Geo.SpatialIndexOnPath = {bbox: [0, 0, 4, 1], start: 0, end: 3}
             var head = {bbox: [0, 0, 2, 0], start: 0, end: 1}
             var tail = {bbox: [2, 0, 4, 1], start: 2, end: 3}
             expected.head = head
@@ -146,7 +145,7 @@ describe('geo', function() {
     describe('findPathSegmentsFromPointInIndex', function() {
 
         // two same size areas, head is upper left, tail is lower right
-        const INDEX: GFCP.SpatialIndexOnPath = {
+        const INDEX: Geo.SpatialIndexOnPath = {
             bbox: [-10, -10, 10, 10],
             start: 0, end: 100,
             head: {
@@ -216,7 +215,7 @@ describe('geo', function() {
 
     describe('findCloseSegments', function() {
 
-        var line: GFCP.Path = {
+        var line: Geo.Path = {
             type: 'Feature',
             geometry: {
                 type: 'LineString',
@@ -247,7 +246,7 @@ describe('geo', function() {
 
     describe('findCloseSegmentsNearPoint', function() {
 
-        var line: GFCP.Path = {
+        var line: Geo.Path = {
             type: 'Feature',
             geometry: {
                 type: 'LineString',
@@ -260,7 +259,7 @@ describe('geo', function() {
             properties: {}
         }
 
-        const INDEX: GFCP.SpatialIndexOnPath = {
+        const INDEX: Geo.SpatialIndexOnPath = {
             bbox: [0, 0, 2, 0],
             start: 0, end: 1,
             head: {
