@@ -136,7 +136,7 @@ var BoundingBox = (function () {
         }
     };
     // TODO: requires line segment math
-    // TODO: intersects(pts: GFCP.LatLongPt[]): boolean
+    // TODO: intersects(pts: Geo.LatLongPt[]): boolean
     BoundingBox.prototype.intersects = function (obj, query_distance) {
         var _this = this;
         var intersectsIBoundingBox = function (bbox, query_distance) {
